@@ -120,6 +120,91 @@ const LAYOUTS: Record<Platform, ListLayout> = {
 
 const INK = "#111111";
 
+// The display ad Kakao pins above the chat rows, copied from a real capture.
+// Sizes are dp at the Android list scale and follow the avatar size on iPhone.
+function AdBanner({ L }: { L: ListLayout }) {
+  const k = L.avatar / 52.3;
+  const gap = L.firstRowTop - L.chipsTop - L.chipH;
+  return (
+    <div
+      style={{
+        position: "relative",
+        height: u(88 * k),
+        margin: `0 ${u(L.chipsLeft)} ${u(gap)}`,
+        borderRadius: u(12 * k),
+        background: "#F3F3F3",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: u(13.5 * k),
+          right: u(112 * k),
+          top: u(26.5 * k),
+          fontSize: u(14 * k),
+          lineHeight: u(18 * k),
+          fontWeight: 700,
+          color: "#4B4B4B",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        노출형 에어 줌 쿠셔닝으로
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: u(13.5 * k),
+          right: u(112 * k),
+          top: u(45.5 * k),
+          fontSize: u(10.3 * k),
+          lineHeight: u(14 * k),
+          color: "#767676",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        더욱 강력하고 민첩하게.
+      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/kakao/ad-banner.jpg"
+        alt=""
+        style={{
+          position: "absolute",
+          right: u(12.85 * k),
+          top: u(17.85 * k),
+          width: u(85.8 * k),
+          height: u(51.5 * k),
+          borderRadius: u(3 * k),
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          right: u(7 * k),
+          top: u(8 * k),
+          width: u(17 * k),
+          height: u(17 * k),
+          lineHeight: u(17 * k),
+          borderRadius: "50%",
+          background: "#FFFFFF",
+          color: "#6E6E6E",
+          fontSize: u(9.5 * k),
+          fontWeight: 700,
+          textAlign: "center",
+        }}
+      >
+        AD
+      </div>
+    </div>
+  );
+}
+
 // Kakao's settings icon is a soft six-lobed "flower" rather than a toothed gear.
 const GEAR_PATH = (() => {
   const pts: string[] = [];
@@ -329,6 +414,7 @@ export default function KakaoChatList({
             overflowY: "auto",
           }}
         >
+          <AdBanner L={L} />
           {rows.map((r) => (
             <div
               key={r.id}

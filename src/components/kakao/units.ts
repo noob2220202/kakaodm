@@ -16,5 +16,5 @@ function superellipsePath(n: number, steps = 96): string {
   return `M${pts.join("L")}Z`;
 }
 
-// Kakao profile images are squircles rather than circles.
-export const SQUIRCLE_PATH = superellipsePath(3.3);
+// Kakao profile images are squircles rather than circles (fitted to a real capture: n = 2.4).
+export const SQUIRCLE_PATH = superellipsePath(2.4);
