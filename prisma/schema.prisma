@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String     @id @default(cuid())
+  name      String
+  avatar    String? // base64 data URL
+  createdAt DateTime   @default(now())
+  chatRooms ChatRoom[]
+}
+
+model ChatRoom {
+  id            String    @id @default(cuid())
+  profileId     String
+  profile       Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  partnerName   String
+  partnerAvatar String? // base64 data URL
+  unreadCount   Int       @default(0)
+  statusBarTime String    @default("오후 9:41") // shown in the fake phone status bar
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  messages      Message[]
+}
+
+enum Sender {
+  ME
+  PARTNER
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DATE_DIVIDER
+}
+
+model Message {
+  id         String      @id @default(cuid())
+  chatRoomId String
+  chatRoom   ChatRoom    @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  sender     Sender      @default(ME)
+  type       MessageType @default(TEXT)
+  content    String // text, base64 image data URL, or divider label
+  timeLabel  String // free-text display time, e.g. "오전 11:23"
+  order      Int
+  createdAt  DateTime    @default(now())
+}
