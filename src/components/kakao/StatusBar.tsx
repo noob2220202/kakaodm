@@ -21,7 +21,7 @@ export default function KakaoStatusBar(props: {
   );
 }
 
-// Measured from the iPhone recording (393pt wide).
+// iOS 26 status bar, measured from Kakao's App Store capture (393pt wide).
 function IOSStatusBar({
   time,
   battery,
@@ -32,8 +32,7 @@ function IOSStatusBar({
   id: string;
 }) {
   const level = Math.max(0, Math.min(100, Math.round(battery)));
-  const bx = 341.3;
-  const bw = 24;
+  const grey = "rgba(0,0,0,0.38)";
   return (
     <svg
       viewBox="0 0 393 54"
@@ -47,10 +46,10 @@ function IOSStatusBar({
       aria-hidden
     >
       <text
-        x="59.8"
-        y="35.2"
+        x="66.3"
+        y="34.1"
         textAnchor="middle"
-        fontSize="15.9"
+        fontSize="16.9"
         fontWeight="600"
         fill="#000"
         letterSpacing="0"
@@ -58,56 +57,53 @@ function IOSStatusBar({
         {time}
       </text>
       {[
-        [296, 4],
-        [300.8, 6.6],
-        [305.6, 9],
-        [310.4, 11.4],
+        [286.86, 3.84],
+        [291.98, 6.39],
+        [297.09, 9.8],
+        [302.21, 11.93],
       ].map(([x, h]) => (
         <rect
           key={x}
           x={x}
-          y={34.6 - h}
-          width="3.2"
+          y={31.54 - h}
+          width="2.98"
           height={h}
-          rx="0.9"
+          rx="0.8"
           fill="#000"
         />
       ))}
-      <g fill="#000" transform="translate(327.75 34.7)">
-        <path d={fan(0.001, 3.9, 42)} />
-        <path d={fan(5.4, 7.7, 42)} />
-        <path d={fan(9.1, 11.4, 42)} />
+      <g fill="#000" transform="translate(321.6 31.6)">
+        <path d={fan(0.001, 4.1, 44)} />
+        <path d={fan(5.65, 8.05, 44)} />
+        <path d={fan(9.5, 11.95, 44)} />
       </g>
       <defs>
         <clipPath id={`ibatt-${id}`}>
-          <rect x={bx} y="22.6" width={bw} height="13" rx="4.1" />
+          <rect x="339.7" y="20.9" width="20.9" height="8.95" rx="2.3" />
         </clipPath>
       </defs>
-      <g clipPath={`url(#ibatt-${id})`}>
-        <rect x={bx} y="22.6" width={bw} height="13" fill="rgba(0,0,0,0.35)" />
-        <rect
-          x={bx}
-          y="22.6"
-          width={(bw * level) / 100}
-          height="13"
-          fill="#000"
-        />
-      </g>
-      <path
-        d="M366.2 27.2 a1.5 1.5 0 0 1 1.5 1.5 v1.6 a1.5 1.5 0 0 1 -1.5 1.5 z"
-        fill="rgba(0,0,0,0.35)"
+      <rect
+        x="338.4"
+        y="19.6"
+        width="23.5"
+        height="11.55"
+        rx="3.8"
+        fill="none"
+        stroke={grey}
+        strokeWidth="1"
       />
-      <text
-        x={bx + bw / 2}
-        y="33.1"
-        textAnchor="middle"
-        fontSize="11"
-        fontWeight="700"
-        fill="#fff"
-        letterSpacing="0"
-      >
-        {level}
-      </text>
+      <rect
+        x="339.7"
+        y="20.9"
+        width={(20.9 * level) / 100}
+        height="8.95"
+        fill="#000"
+        clipPath={`url(#ibatt-${id})`}
+      />
+      <path
+        d="M363 23.9 a1.3 1.3 0 0 1 1.3 1.3 v1.6 a1.3 1.3 0 0 1 -1.3 1.3 z"
+        fill={grey}
+      />
     </svg>
   );
 }

@@ -20,6 +20,11 @@ const m = (
   type,
   unread: false,
 });
+const PHOTO =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><rect width="300" height="400" fill="#4F7A3A"/></svg>',
+  );
 const d = (label: string) => m("ME", label, "", "DATE_DIVIDER");
 
 type Fixture = {
@@ -51,26 +56,18 @@ const FIXTURES: Record<string, Fixture> = {
       m("PARTNER", "아들 바로올거야?", "오후 4:56"),
     ],
   },
+  // Kakao's App Store capture (iOS 26); the shared video card is stood in by a plain 3:4 image.
   ios: {
     platform: "ios",
-    name: "김동철 데포",
+    name: "대학교 친구들 3",
     color: "teal",
-    time: "9:45",
-    battery: 73,
+    time: "9:41",
+    battery: 100,
     messages: [
-      m("ME", "완료입니다", "오전 11:45"),
-      d("2026년 10월 12일 월요일"),
-      m("PARTNER", "사장님 계시나요?", "오전 11:15"),
-      m("ME", "점심 먹고잇습니다", "오전 11:16"),
-      m("PARTNER", "아ㅜㅜ급한데", "오전 11:16"),
-      m("ME", "1시 이후 문의주세여ㅜㅜ", "오전 11:16"),
-      m("PARTNER", "네ㅜㅜ", "오전 11:16"),
-      m("PARTNER", "오셧나요?", "오후 1:16"),
-      m("ME", "네!", "오후 1:16"),
-      m("PARTNER", "1442만 구매할게용", "오후 1:20"),
-      m("ME", "네네 101만 입니다!", "오후 1:22"),
-      m("PARTNER", "송금바로 해드릴까요?", "오후 1:25"),
-      m("ME", "네 해주세요", "오후 1:27"),
+      m("ME", PHOTO, "오후 12:03", "IMAGE"),
+      m("ME", "댕댕이 너무 귀여워", "오후 12:03"),
+      m("PARTNER", "귀 펄럭이는 것 좀 봐", "오후 12:03"),
+      m("PARTNER", "진짜 사랑스럽다", "오후 12:04"),
     ],
   },
 };

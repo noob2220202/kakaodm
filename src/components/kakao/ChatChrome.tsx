@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { Platform } from "@/lib/kakaoSpec";
 import { u } from "./units";
 
@@ -19,13 +20,56 @@ export function ChatInputBar({ platform }: { platform: Platform }) {
   return platform === "ios" ? <IOSInputBar /> : <AndroidInputBar />;
 }
 
-const IOS_INK = "#1B2733";
+const IOS_INK = "#191919";
+
+// iOS 26 "Liquid Glass" control: translucent white fill, bright rim, soft shadow.
+function Glass({
+  id,
+  shape,
+}: {
+  id: string;
+  shape: React.ReactElement<React.SVGProps<SVGElement>>;
+}) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`gf-${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.13" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0.27" />
+        </linearGradient>
+        <filter id={`gs-${id}`} x="-20%" y="-20%" width="140%" height="160%">
+          <feGaussianBlur stdDeviation="1.6" />
+        </filter>
+        {/* the shadow only shows outside the control, never through its glass */}
+        <mask id={`gm-${id}`}>
+          <rect x="0" y="0" width="393" height="120" fill="#fff" />
+          <g fill="#000">{shape}</g>
+        </mask>
+      </defs>
+      <g mask={`url(#gm-${id})`}>
+        <g filter={`url(#gs-${id})`} opacity="0.12" transform="translate(0 1)">
+          {shape}
+        </g>
+      </g>
+      <g
+        fill={`url(#gf-${id})`}
+        stroke="rgba(255,255,255,0.92)"
+        strokeWidth="0.5"
+      >
+        {shape}
+      </g>
+    </>
+  );
+}
 
 function IOSHeader({ title, onBack }: { title: string; onBack?: () => void }) {
+  const id = useId().replace(/:/g, "");
+  // a group room's member count ("대학교 친구들 3") is drawn in grey
+  const count = /^(.*\S)\s+(\d+)$/.exec(title);
   return (
     <>
       <svg
-        viewBox="0 0 393 92"
+        viewBox="0 0 393 100"
         style={{
           position: "absolute",
           top: 0,
@@ -36,32 +80,42 @@ function IOSHeader({ title, onBack }: { title: string; onBack?: () => void }) {
         }}
         aria-hidden
       >
+        <Glass
+          id={`b${id}`}
+          shape={<circle cx="37.72" cy="74.8" r="22.38" />}
+        />
+        <Glass
+          id={`c${id}`}
+          shape={
+            <rect x="289" y="52.43" width="88.66" height="44.76" rx="22.38" />
+          }
+        />
         <path
-          d="M27.4 60.4 L18.9 68.9 L27.4 77.4"
+          d="M41 65.9 L32.2 74.8 L41 83.7"
           stroke={IOS_INK}
-          strokeWidth="2.1"
+          strokeWidth="2.2"
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <circle
-          cx="319.6"
-          cy="68"
-          r="7.3"
+          cx="311.9"
+          cy="73.6"
+          r="7"
           stroke={IOS_INK}
-          strokeWidth="1.95"
+          strokeWidth="2.05"
           fill="none"
         />
         <path
-          d="M324.9 73.4 L329.9 78.5"
+          d="M317 78.7 L321.6 83.3"
           stroke={IOS_INK}
-          strokeWidth="2.1"
+          strokeWidth="2.15"
           strokeLinecap="round"
         />
         <path
-          d="M352.4 62.2 H370.4 M352.4 68.55 H370.4 M352.4 74.9 H370.4"
+          d="M344.9 67.78 H361.8 M344.9 74.8 H361.8 M344.9 81.84 H361.8"
           stroke={IOS_INK}
-          strokeWidth="1.85"
+          strokeWidth="1.9"
           strokeLinecap="round"
         />
       </svg>
@@ -72,11 +126,11 @@ function IOSHeader({ title, onBack }: { title: string; onBack?: () => void }) {
           className="kakao-press"
           style={{
             position: "absolute",
-            left: u(4),
-            top: u(50),
-            width: u(40),
-            height: u(38),
-            borderRadius: u(19),
+            left: u(15.3),
+            top: u(52.4),
+            width: u(44.8),
+            height: u(44.8),
+            borderRadius: "50%",
           }}
         />
       )}
@@ -84,26 +138,36 @@ function IOSHeader({ title, onBack }: { title: string; onBack?: () => void }) {
         style={{
           position: "absolute",
           left: u(70),
-          right: u(70),
-          top: u(69.3 - 11),
+          right: u(110),
+          marginLeft: u(0),
+          top: u(74.6 - 11),
           height: u(22),
           lineHeight: u(22),
           textAlign: "center",
-          fontSize: u(16.9),
-          fontWeight: 600,
+          fontSize: u(17.9),
+          fontWeight: 700,
+          letterSpacing: 0,
           color: IOS_INK,
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
+          paddingLeft: u(40),
         }}
       >
-        {title}
+        {count ? (
+          <>
+            {count[1]} <span style={{ color: "#363B3E" }}>{count[2]}</span>
+          </>
+        ) : (
+          title
+        )}
       </div>
     </>
   );
 }
 
 function IOSInputBar() {
+  const id = useId().replace(/:/g, "");
   return (
     <div
       style={{
@@ -111,57 +175,82 @@ function IOSInputBar() {
         left: 0,
         right: 0,
         bottom: 0,
-        height: u(76.5),
-        background: "#FFFFFF",
+        height: u(99.25),
       }}
     >
       <svg
-        viewBox="0 0 393 76.5"
-        style={{ width: "100%", display: "block" }}
+        viewBox="0 0 393 99.25"
+        style={{ width: "100%", display: "block", overflow: "visible" }}
         aria-hidden
       >
-        <circle cx="24.1" cy="23.2" r="14.2" fill="#F0F0F2" />
-        <path
-          d="M24.1 16.6 V29.8 M17.5 23.2 H30.7"
-          stroke="#111"
-          strokeWidth="1.8"
-          strokeLinecap="round"
+        <defs>
+          <filter id={`is-${id}`} x="-10%" y="-60%" width="120%" height="220%">
+            <feGaussianBlur stdDeviation="4" />
+          </filter>
+        </defs>
+        <rect
+          x="9.38"
+          y="0"
+          width="373.82"
+          height="48.59"
+          rx="24.3"
+          fill="#000"
+          opacity="0.12"
+          filter={`url(#is-${id})`}
         />
         <rect
-          x="46.2"
-          y="5.3"
-          width="300.5"
-          height="35.9"
-          rx="17.95"
-          fill="#F0F0F2"
+          x="9.38"
+          y="0"
+          width="373.82"
+          height="48.59"
+          rx="24.3"
+          fill="#D8E7EF"
         />
-        <circle cx="326" cy="23.2" r="13" fill="#D9D8DC" />
-        <circle cx="321.7" cy="20.3" r="1.25" fill="#1A1A1A" />
-        <circle cx="330.3" cy="20.3" r="1.25" fill="#1A1A1A" />
+        <circle cx="33.67" cy="24.3" r="16" fill="#FFFFFF" />
         <path
-          d="M321.2 25 Q326 29.6 330.8 25"
-          stroke="#1A1A1A"
-          strokeWidth="1.6"
+          d="M33.67 17.5 V31.1 M26.87 24.3 H40.47"
+          stroke={IOS_INK}
+          strokeWidth="2.1"
+          strokeLinecap="round"
+        />
+        <circle cx="318.8" cy="24.1" r="11.5" fill="#BFCBD3" />
+        <path
+          d="M314 20.2 V22.6 M323.7 20.2 V22.6"
+          stroke={IOS_INK}
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+        <path
+          d="M319.4 20.6 Q317.6 21.8 319 23.6"
+          stroke={IOS_INK}
+          strokeWidth="1.3"
           fill="none"
           strokeLinecap="round"
         />
-        <circle cx="369.2" cy="23.2" r="14.2" fill="#F0F0F2" />
         <path
-          d="M366.2 16.9 L364.4 29.5 M373.6 16.9 L371.8 29.5 M362.6 20.7 H375.6 M361.8 25.7 H374.8"
-          stroke="#111"
-          strokeWidth="1.7"
+          d="M314.4 26.1 Q319.2 31 324.1 26.1"
+          stroke={IOS_INK}
+          strokeWidth="1.8"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <circle cx="359.1" cy="24.35" r="16" fill="#FFFFFF" />
+        <path
+          d="M356.4 17.9 L354.8 30.7 M363.4 17.9 L361.8 30.7 M352.6 21.8 H365.5 M351.9 27 H364.8"
+          stroke={IOS_INK}
+          strokeWidth="1.9"
           strokeLinecap="round"
         />
       </svg>
       <div
         style={{
           position: "absolute",
-          left: u(58),
-          top: u(5.3),
-          height: u(35.9),
-          lineHeight: u(35.9),
-          fontSize: u(12.3),
-          color: "#C3C2C7",
+          left: u(58.3),
+          top: 0,
+          height: u(48.59),
+          lineHeight: u(48.59),
+          fontSize: u(14.4),
+          color: "#8C9599",
         }}
       >
         메시지 입력

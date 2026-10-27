@@ -18,6 +18,8 @@ type Item = {
   m: KakaoMessage;
   first: boolean;
   last: boolean;
+  /** a text bubble right after a photo gets its tail back, as in the app */
+  tail: boolean;
   marginTop: number;
 };
 
@@ -43,9 +45,11 @@ function layoutItems(messages: KakaoMessage[], spec: Spec): Item[] {
       else if (sameGroup(prev, m)) marginTop = spec.gap.consecutive;
       else marginTop = spec.gap.group;
     }
+    const first = !sameGroup(prev, m);
     return {
       m,
-      first: !sameGroup(prev, m),
+      first,
+      tail: first || prev?.type === "IMAGE",
       last: !sameGroup(m, next),
       marginTop,
     };
@@ -303,32 +307,42 @@ function Meta({
   );
 }
 
+// Kakao sizes photos by aspect ratio rather than fitting a fixed box
+// (measured: 4:3 -> 275pt wide, 3:4 -> 240pt, 9:19.5 screenshot -> 231pt).
+function imageSize(spec: Spec, w: number, h: number) {
+  const a = w / h;
+  let width: number;
+  if (a >= 1) width = 275;
+  else if (a >= 0.75) width = 240 + ((a - 0.75) / 0.25) * 35;
+  else width = Math.max(200, 231 + ((a - 0.46) / 0.29) * 9);
+  const k = spec.image.scale;
+  return { w: width * k, h: Math.min(width / a, spec.image.maxH / k) * k };
+}
+
 function ImageBody({ spec, src }: { spec: Spec; src: string }) {
-  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
-  const img = spec.image;
-  let w = img.maxW;
-  let h = img.maxW * 0.75;
-  if (size) {
-    const s = Math.min(img.maxW / size.w, img.maxH / size.h);
-    w = size.w * s;
-    h = size.h * s;
-  }
+  const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
+  const ref = useRef<HTMLImageElement>(null);
+  const size = imageSize(spec, natural?.w ?? 4, natural?.h ?? 3);
+  const measure = (img: HTMLImageElement) => {
+    if (img.naturalWidth && img.naturalHeight)
+      setNatural({ w: img.naturalWidth, h: img.naturalHeight });
+  };
+  // a server-rendered image can finish loading before React attaches onLoad
+  useLayoutEffect(() => {
+    if (ref.current?.complete) measure(ref.current);
+  }, [src]);
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      ref={ref}
       src={src}
       alt=""
-      onLoad={(e) =>
-        setSize({
-          w: e.currentTarget.naturalWidth,
-          h: e.currentTarget.naturalHeight,
-        })
-      }
+      onLoad={(e) => measure(e.currentTarget)}
       style={{
-        width: u(w),
-        height: u(h),
+        width: u(size.w),
+        height: u(size.h),
         objectFit: "cover",
-        borderRadius: u(img.radius),
+        borderRadius: u(spec.image.radius),
         display: "block",
         flexShrink: 0,
       }}
@@ -344,7 +358,7 @@ function ShareButton({ spec }: { spec: Spec }) {
         width: u(d),
         height: u(d),
         borderRadius: "50%",
-        background: "rgba(0,0,0,0.24)",
+        background: spec.image.shareBg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -358,7 +372,7 @@ function ShareButton({ spec }: { spec: Spec }) {
       >
         <path
           d="M7 1.2 V8.6 M4.2 3.9 L7 1.1 L9.8 3.9"
-          stroke="#fff"
+          stroke={spec.image.shareFg}
           strokeWidth="1.5"
           fill="none"
           strokeLinecap="round"
@@ -366,7 +380,7 @@ function ShareButton({ spec }: { spec: Spec }) {
         />
         <path
           d="M2 7.4 V12.4 H12 V7.4"
-          stroke="#fff"
+          stroke={spec.image.shareFg}
           strokeWidth="1.5"
           fill="none"
           strokeLinejoin="round"
@@ -391,7 +405,7 @@ function MessageRow({
   avatarColor: string;
   fontScale: number;
 }) {
-  const { m, first, last } = item;
+  const { m, first, last, tail } = item;
   const isMe = m.sender === "ME";
   const b = spec.bubble;
   const color = isMe ? "#FEE500" : "#FFFFFF";
@@ -399,7 +413,7 @@ function MessageRow({
 
   const textStyle: React.CSSProperties = {
     position: "relative",
-    padding: `${u(b.padTop)} ${u(b.padH)} ${u(b.padBottom)}`,
+    padding: `${u(b.padTop)} ${u(b.padR ?? b.padH)} ${u(b.padBottom)} ${u(b.padH)}`,
     maxWidth: u(b.maxWidth),
     minWidth: u(b.minWidth),
     boxSizing: "border-box",
@@ -414,7 +428,7 @@ function MessageRow({
   const text = <span style={{ position: "relative" }}>{m.content}</span>;
   const body = isImage ? (
     <ImageBody spec={spec} src={m.content} />
-  ) : first ? (
+  ) : tail ? (
     <TailedBubble
       spec={spec}
       color={color}
