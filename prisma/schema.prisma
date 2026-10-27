@@ -26,7 +26,10 @@ model ChatRoom {
   partnerName   String
   partnerAvatar String? // base64 data URL
   unreadCount   Int       @default(0)
-  statusBarTime String    @default("오후 9:41") // shown in the fake phone status bar
+  statusBarTime String    @default("") // clock in the fake status bar; empty hides it
+  fontScale     Float     @default(1)
+  avatarColor   String    @default("mint")
+  batteryLevel  Int       @default(76)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   messages      Message[]
@@ -51,6 +54,7 @@ model Message {
   type       MessageType @default(TEXT)
   content    String // text, base64 image data URL, or divider label
   timeLabel  String // free-text display time, e.g. "오전 11:23"
+  unread     Boolean     @default(false) // shows the yellow "1"
   order      Int
   createdAt  DateTime    @default(now())
 }

@@ -26,28 +26,30 @@ export default async function ChatListPage({
     },
   });
 
-  const roomData = rooms.map((r) => {
+  const rows = rooms.map((r) => {
     const last = r.messages[0];
-    const preview = last
-      ? last.type === "IMAGE"
-        ? "사진"
-        : last.content
-      : "대화를 시작해보세요";
     return {
       id: r.id,
-      partnerName: r.partnerName,
-      partnerAvatar: r.partnerAvatar,
-      unreadCount: r.unreadCount,
-      preview,
+      name: r.partnerName,
+      avatar: r.partnerAvatar,
+      avatarColor: r.avatarColor,
+      preview: last
+        ? last.type === "IMAGE"
+          ? "사진을 보냈습니다."
+          : last.content
+        : "",
       time: last?.timeLabel ?? "",
+      unread: r.unreadCount,
     };
   });
 
+  const latest = rooms[0];
   return (
     <ChatListScreen
       profileId={profileId}
-      profileName={profile.name}
-      rooms={roomData}
+      rows={rows}
+      statusBarTime={latest?.statusBarTime ?? ""}
+      battery={latest?.batteryLevel ?? 76}
     />
   );
 }

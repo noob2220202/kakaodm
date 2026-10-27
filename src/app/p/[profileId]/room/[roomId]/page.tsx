@@ -19,16 +19,22 @@ export default async function RoomPage({
     <ChatRoomScreen
       profileId={profileId}
       roomId={room.id}
-      partnerName={room.partnerName}
-      partnerAvatar={room.partnerAvatar}
-      unreadCount={room.unreadCount}
-      statusBarTime={room.statusBarTime}
+      settings={{
+        partnerName: room.partnerName,
+        partnerAvatar: room.partnerAvatar,
+        avatarColor: room.avatarColor,
+        unreadCount: room.unreadCount,
+        statusBarTime: room.statusBarTime,
+        batteryLevel: room.batteryLevel,
+        fontScale: room.fontScale,
+      }}
       messages={room.messages.map((m) => ({
         id: m.id,
         sender: m.sender,
         type: m.type,
         content: m.content,
         timeLabel: m.timeLabel,
+        unread: m.unread,
       }))}
     />
   );

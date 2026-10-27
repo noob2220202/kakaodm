@@ -8,11 +8,7 @@ import { createProfile, deleteProfile, updateProfile } from "@/lib/actions";
 
 type Profile = { id: string; name: string; avatar: string | null };
 
-export default function ProfilePicker({
-  profiles,
-}: {
-  profiles: Profile[];
-}) {
+export default function ProfilePicker({ profiles }: { profiles: Profile[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [editMode, setEditMode] = useState(false);
