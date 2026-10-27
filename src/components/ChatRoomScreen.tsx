@@ -17,19 +17,18 @@ import {
   updateMessage,
 } from "@/lib/actions";
 import { fileToCompressedDataUrl, nowTimeLabel } from "@/lib/image";
-import { SPEC } from "@/lib/kakaoSpec";
+import { SPECS, type Platform } from "@/lib/kakaoSpec";
 
 type Sender = "ME" | "PARTNER";
 
-// Real screenshot size of the reference phone (1080px wide).
-const EXPORT_WIDTH_PX = 1080;
-
 export default function ChatRoomScreen({
+  platform,
   profileId,
   roomId,
   settings,
   messages,
 }: {
+  platform: Platform;
   profileId: string;
   roomId: string;
   settings: RoomSettings;
@@ -55,7 +54,9 @@ export default function ChatRoomScreen({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const exportRef = useRef<KakaoChatScreenHandle>(null);
 
+  const spec = SPECS[platform];
   const screenProps = {
+    platform,
     partnerName: settings.partnerName,
     partnerAvatar: settings.partnerAvatar,
     avatarColor: settings.avatarColor,
@@ -144,9 +145,9 @@ export default function ChatRoomScreen({
       if (!root) return;
       const { toPng } = await import("html-to-image");
       const dataUrl = await toPng(root, {
-        pixelRatio: EXPORT_WIDTH_PX / SPEC.W,
-        width: SPEC.W,
-        height: SPEC.H,
+        pixelRatio: spec.exportWidthPx / spec.W,
+        width: spec.W,
+        height: spec.H,
       });
       const a = document.createElement("a");
       a.href = dataUrl;
@@ -165,7 +166,7 @@ export default function ChatRoomScreen({
         position: "fixed",
         left: -10000,
         top: 0,
-        width: SPEC.W,
+        width: spec.W,
         pointerEvents: "none",
       }}
     >

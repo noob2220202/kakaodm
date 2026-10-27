@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { SPEC, type Spec } from "@/lib/kakaoSpec";
+import type { Spec } from "@/lib/kakaoSpec";
 import KakaoAvatar from "./Avatar";
 import { u } from "./units";
 
@@ -53,6 +53,7 @@ function layoutItems(messages: KakaoMessage[], spec: Spec): Item[] {
 }
 
 export default function MessageList({
+  spec,
   messages,
   partnerName,
   partnerAvatar,
@@ -60,6 +61,7 @@ export default function MessageList({
   fontScale,
   onMessageClick,
 }: {
+  spec: Spec;
   messages: KakaoMessage[];
   partnerName: string;
   partnerAvatar: string | null;
@@ -67,7 +69,6 @@ export default function MessageList({
   fontScale: number;
   onMessageClick?: (m: KakaoMessage) => void;
 }) {
-  const spec = SPEC;
   const items = layoutItems(messages, spec);
   return (
     <>
@@ -114,6 +115,37 @@ function DatePill({ spec, label }: { spec: Spec; label: string }) {
           whiteSpace: "nowrap",
         }}
       >
+        {p.icon && (
+          <svg
+            viewBox="0 0 12 12"
+            style={{
+              width: u(11.6),
+              height: u(11.6),
+              marginRight: u(4),
+              flexShrink: 0,
+            }}
+            aria-hidden
+          >
+            <rect
+              x="1"
+              y="1.6"
+              width="10"
+              height="9.6"
+              rx="2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.05"
+            />
+            <path d="M1 4.3 H11" stroke="currentColor" strokeWidth="1.05" />
+            <g fill="currentColor">
+              <circle cx="3.6" cy="6.6" r="0.62" />
+              <circle cx="6" cy="6.6" r="0.62" />
+              <circle cx="8.4" cy="6.6" r="0.62" />
+              <circle cx="3.6" cy="8.9" r="0.62" />
+              <circle cx="6" cy="8.9" r="0.62" />
+            </g>
+          </svg>
+        )}
         <span style={{ lineHeight: 1 }}>{label}</span>
         <svg
           viewBox="0 0 6 10"

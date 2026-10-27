@@ -1,9 +1,176 @@
-import { SPEC } from "@/lib/kakaoSpec";
+import type { Platform } from "@/lib/kakaoSpec";
 import { u } from "./units";
 
 const INK = "#14191D";
 
-export function ChatHeader({
+export function ChatHeader(props: {
+  platform: Platform;
+  title: string;
+  onBack?: () => void;
+}) {
+  return props.platform === "ios" ? (
+    <IOSHeader {...props} />
+  ) : (
+    <AndroidHeader {...props} />
+  );
+}
+
+export function ChatInputBar({ platform }: { platform: Platform }) {
+  return platform === "ios" ? <IOSInputBar /> : <AndroidInputBar />;
+}
+
+const IOS_INK = "#1B2733";
+
+function IOSHeader({ title, onBack }: { title: string; onBack?: () => void }) {
+  return (
+    <>
+      <svg
+        viewBox="0 0 393 92"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          display: "block",
+          pointerEvents: "none",
+        }}
+        aria-hidden
+      >
+        <path
+          d="M27.4 60.4 L18.9 68.9 L27.4 77.4"
+          stroke={IOS_INK}
+          strokeWidth="2.1"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle
+          cx="319.6"
+          cy="68"
+          r="7.3"
+          stroke={IOS_INK}
+          strokeWidth="1.95"
+          fill="none"
+        />
+        <path
+          d="M324.9 73.4 L329.9 78.5"
+          stroke={IOS_INK}
+          strokeWidth="2.1"
+          strokeLinecap="round"
+        />
+        <path
+          d="M352.4 62.2 H370.4 M352.4 68.55 H370.4 M352.4 74.9 H370.4"
+          stroke={IOS_INK}
+          strokeWidth="1.85"
+          strokeLinecap="round"
+        />
+      </svg>
+      {onBack && (
+        <button
+          onClick={onBack}
+          aria-label="뒤로"
+          className="kakao-press"
+          style={{
+            position: "absolute",
+            left: u(4),
+            top: u(50),
+            width: u(40),
+            height: u(38),
+            borderRadius: u(19),
+          }}
+        />
+      )}
+      <div
+        style={{
+          position: "absolute",
+          left: u(70),
+          right: u(70),
+          top: u(69.3 - 11),
+          height: u(22),
+          lineHeight: u(22),
+          textAlign: "center",
+          fontSize: u(16.9),
+          fontWeight: 600,
+          color: IOS_INK,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {title}
+      </div>
+    </>
+  );
+}
+
+function IOSInputBar() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: u(76.5),
+        background: "#FFFFFF",
+      }}
+    >
+      <svg
+        viewBox="0 0 393 76.5"
+        style={{ width: "100%", display: "block" }}
+        aria-hidden
+      >
+        <circle cx="24.1" cy="23.2" r="14.2" fill="#F0F0F2" />
+        <path
+          d="M24.1 16.6 V29.8 M17.5 23.2 H30.7"
+          stroke="#111"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        <rect
+          x="46.2"
+          y="5.3"
+          width="300.5"
+          height="35.9"
+          rx="17.95"
+          fill="#F0F0F2"
+        />
+        <circle cx="326" cy="23.2" r="13" fill="#D9D8DC" />
+        <circle cx="321.7" cy="20.3" r="1.25" fill="#1A1A1A" />
+        <circle cx="330.3" cy="20.3" r="1.25" fill="#1A1A1A" />
+        <path
+          d="M321.2 25 Q326 29.6 330.8 25"
+          stroke="#1A1A1A"
+          strokeWidth="1.6"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <circle cx="369.2" cy="23.2" r="14.2" fill="#F0F0F2" />
+        <path
+          d="M366.2 16.9 L364.4 29.5 M373.6 16.9 L371.8 29.5 M362.6 20.7 H375.6 M361.8 25.7 H374.8"
+          stroke="#111"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+      </svg>
+      <div
+        style={{
+          position: "absolute",
+          left: u(58),
+          top: u(5.3),
+          height: u(35.9),
+          lineHeight: u(35.9),
+          fontSize: u(12.3),
+          color: "#C3C2C7",
+        }}
+      >
+        메시지 입력
+      </div>
+    </div>
+  );
+}
+
+function AndroidHeader({
   title,
   onBack,
 }: {
@@ -84,7 +251,7 @@ export function ChatHeader({
           top: u(61.75 - 11),
           height: u(22),
           lineHeight: u(22),
-          fontSize: u(SPEC.titleSize),
+          fontSize: u(17.6),
           fontWeight: 800,
           color: INK,
           whiteSpace: "nowrap",
@@ -98,7 +265,7 @@ export function ChatHeader({
   );
 }
 
-export function ChatInputBar() {
+function AndroidInputBar() {
   return (
     <div
       style={{
@@ -162,7 +329,7 @@ export function ChatInputBar() {
           top: 0,
           height: u(51.5),
           lineHeight: u(51.5),
-          fontSize: u(SPEC.placeholderSize),
+          fontSize: u(14.7),
           color: "#9A9FA3",
         }}
       >

@@ -22,25 +22,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family:
-    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-    "Malgun Gothic", "Noto Sans KR", sans-serif;
-}
-
-/* KakaoTalk default chat-room background pattern (light mint/grey) */
-.kakao-chat-bg {
-  background-color: #b2c7d9;
-  background-image:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.06) 25%,
-      transparent 25%
-    ),
-    linear-gradient(
-      -135deg,
-      rgba(255, 255, 255, 0.06) 25%,
-      transparent 25%
-    );
-  background-size: 6px 6px;
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic",
+    "Noto Sans KR", sans-serif;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -49,20 +32,6 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-@keyframes bubble-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.animate-bubble-in {
-  animation: bubble-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes modal-backdrop-in {

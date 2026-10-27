@@ -5,13 +5,16 @@ import { useRouter } from "next/navigation";
 import KakaoChatList, { type KakaoListRow } from "./kakao/KakaoChatList";
 import ProfileModal from "./ProfileModal";
 import { createChatRoom } from "@/lib/actions";
+import type { Platform } from "@/lib/kakaoSpec";
 
 export default function ChatListScreen({
+  platform,
   profileId,
   rows,
   statusBarTime,
   battery,
 }: {
+  platform: Platform;
   profileId: string;
   rows: KakaoListRow[];
   statusBarTime: string;
@@ -55,6 +58,7 @@ export default function ChatListScreen({
     >
       <div className="animate-list-in w-full max-w-[430px] h-full relative">
         <KakaoChatList
+          platform={platform}
           rows={rows}
           statusBarTime={statusBarTime}
           battery={battery}

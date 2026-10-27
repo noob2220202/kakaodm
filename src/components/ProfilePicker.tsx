@@ -5,8 +5,14 @@ import { useRouter } from "next/navigation";
 import AvatarImage from "./AvatarImage";
 import ProfileModal from "./ProfileModal";
 import { createProfile, deleteProfile, updateProfile } from "@/lib/actions";
+import type { Platform } from "@/lib/kakaoSpec";
 
-type Profile = { id: string; name: string; avatar: string | null };
+type Profile = {
+  id: string;
+  name: string;
+  avatar: string | null;
+  platform: Platform;
+};
 
 export default function ProfilePicker({ profiles }: { profiles: Profile[] }) {
   const router = useRouter();
@@ -52,6 +58,9 @@ export default function ProfilePicker({ profiles }: { profiles: Profile[] }) {
             <span className="text-sm text-gray-700 group-hover:text-black max-w-[96px] truncate">
               {p.name}
             </span>
+            <span className="text-[11px] text-gray-400 -mt-1.5">
+              {p.platform === "ios" ? "아이폰" : "안드로이드"}
+            </span>
           </button>
         ))}
 
@@ -78,12 +87,13 @@ export default function ProfilePicker({ profiles }: { profiles: Profile[] }) {
       {adding && (
         <ProfileModal
           title="새 프로필"
+          initialPlatform="android"
           confirmLabel="만들기"
           onCancel={() => setAdding(false)}
-          onConfirm={(name, avatar) => {
+          onConfirm={(name, avatar, platform) => {
             setAdding(false);
             startTransition(() => {
-              createProfile(name, avatar);
+              createProfile(name, avatar, platform);
             });
           }}
         />
@@ -95,12 +105,13 @@ export default function ProfilePicker({ profiles }: { profiles: Profile[] }) {
           confirmLabel="저장"
           initialName={editing.name}
           initialAvatar={editing.avatar}
+          initialPlatform={editing.platform}
           onCancel={() => setEditing(null)}
-          onConfirm={(name, avatar) => {
+          onConfirm={(name, avatar, platform) => {
             const id = editing.id;
             setEditing(null);
             startTransition(() => {
-              updateProfile(id, { name, avatar });
+              updateProfile(id, { name, avatar, platform });
             });
           }}
           onDelete={() => {

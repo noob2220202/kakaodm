@@ -5,7 +5,114 @@ function fan(r1: number, r2: number, deg: number): string {
   return `M${p(r1, -1)} L${p(r2, -1)} A${r2} ${r2} 0 0 1 ${p(r2, 1)} L${p(r1, 1)} A${r1} ${r1} 0 0 0 ${p(r1, -1)} Z`;
 }
 
-export default function KakaoStatusBar({
+import type { Platform } from "@/lib/kakaoSpec";
+
+export default function KakaoStatusBar(props: {
+  platform: Platform;
+  time: string;
+  battery: number;
+  bg: string;
+  id: string;
+}) {
+  return props.platform === "ios" ? (
+    <IOSStatusBar {...props} />
+  ) : (
+    <AndroidStatusBar {...props} />
+  );
+}
+
+// Measured from the iPhone recording (393pt wide).
+function IOSStatusBar({
+  time,
+  battery,
+  id,
+}: {
+  time: string;
+  battery: number;
+  id: string;
+}) {
+  const level = Math.max(0, Math.min(100, Math.round(battery)));
+  const bx = 341.3;
+  const bw = 24;
+  return (
+    <svg
+      viewBox="0 0 393 54"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        display: "block",
+      }}
+      aria-hidden
+    >
+      <text
+        x="59.8"
+        y="35.2"
+        textAnchor="middle"
+        fontSize="15.9"
+        fontWeight="600"
+        fill="#000"
+        letterSpacing="0"
+      >
+        {time}
+      </text>
+      {[
+        [296, 4],
+        [300.8, 6.6],
+        [305.6, 9],
+        [310.4, 11.4],
+      ].map(([x, h]) => (
+        <rect
+          key={x}
+          x={x}
+          y={34.6 - h}
+          width="3.2"
+          height={h}
+          rx="0.9"
+          fill="#000"
+        />
+      ))}
+      <g fill="#000" transform="translate(327.75 34.7)">
+        <path d={fan(0.001, 3.9, 42)} />
+        <path d={fan(5.4, 7.7, 42)} />
+        <path d={fan(9.1, 11.4, 42)} />
+      </g>
+      <defs>
+        <clipPath id={`ibatt-${id}`}>
+          <rect x={bx} y="22.6" width={bw} height="13" rx="4.1" />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#ibatt-${id})`}>
+        <rect x={bx} y="22.6" width={bw} height="13" fill="rgba(0,0,0,0.35)" />
+        <rect
+          x={bx}
+          y="22.6"
+          width={(bw * level) / 100}
+          height="13"
+          fill="#000"
+        />
+      </g>
+      <path
+        d="M366.2 27.2 a1.5 1.5 0 0 1 1.5 1.5 v1.6 a1.5 1.5 0 0 1 -1.5 1.5 z"
+        fill="rgba(0,0,0,0.35)"
+      />
+      <text
+        x={bx + bw / 2}
+        y="33.1"
+        textAnchor="middle"
+        fontSize="11"
+        fontWeight="700"
+        fill="#fff"
+        letterSpacing="0"
+      >
+        {level}
+      </text>
+    </svg>
+  );
+}
+
+function AndroidStatusBar({
   time,
   battery,
   bg,

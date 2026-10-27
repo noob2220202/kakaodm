@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ChatRoomScreen from "@/components/ChatRoomScreen";
+import { asPlatform } from "@/lib/kakaoSpec";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +12,16 @@ export default async function RoomPage({
 
   const room = await prisma.chatRoom.findFirst({
     where: { id: roomId, profileId },
-    include: { messages: { orderBy: { order: "asc" } } },
+    include: {
+      messages: { orderBy: { order: "asc" } },
+      profile: { select: { platform: true } },
+    },
   });
   if (!room) notFound();
 
   return (
     <ChatRoomScreen
+      platform={asPlatform(room.profile.platform)}
       profileId={profileId}
       roomId={room.id}
       settings={{

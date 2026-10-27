@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ChatListScreen from "@/components/ChatListScreen";
+import { SPECS, asPlatform } from "@/lib/kakaoSpec";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +47,13 @@ export default async function ChatListPage({
   const latest = rooms[0];
   return (
     <ChatListScreen
+      platform={asPlatform(profile.platform)}
       profileId={profileId}
       rows={rows}
-      statusBarTime={latest?.statusBarTime ?? ""}
+      statusBarTime={
+        latest?.statusBarTime ??
+        SPECS[asPlatform(profile.platform)].defaultClock
+      }
       battery={latest?.batteryLevel ?? 76}
     />
   );

@@ -3,10 +3,12 @@
 import { useState } from "react";
 import AvatarImage from "./AvatarImage";
 import { fileToAvatarDataUrl } from "@/lib/image";
+import { PLATFORMS, type Platform } from "@/lib/kakaoSpec";
 
 export default function ProfileModal({
   initialName = "",
   initialAvatar = null,
+  initialPlatform,
   title,
   confirmLabel,
   onConfirm,
@@ -15,14 +17,19 @@ export default function ProfileModal({
 }: {
   initialName?: string;
   initialAvatar?: string | null;
+  /** When set, the modal also asks which phone's KakaoTalk to imitate. */
+  initialPlatform?: Platform;
   title: string;
   confirmLabel: string;
-  onConfirm: (name: string, avatar: string | null) => void;
+  onConfirm: (name: string, avatar: string | null, platform: Platform) => void;
   onCancel: () => void;
   onDelete?: () => void;
 }) {
   const [name, setName] = useState(initialName);
   const [avatar, setAvatar] = useState<string | null>(initialAvatar);
+  const [platform, setPlatform] = useState<Platform>(
+    initialPlatform ?? "android",
+  );
   const [busy, setBusy] = useState(false);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -65,10 +72,33 @@ export default function ProfileModal({
           className="border border-gray-300 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-[#fee500]"
         />
 
+        {initialPlatform && (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm text-gray-600 text-center">
+              어떤 폰 카톡으로 만들까요?
+            </span>
+            <div className="flex gap-2">
+              {PLATFORMS.map((p) => (
+                <button
+                  key={p.key}
+                  onClick={() => setPlatform(p.key)}
+                  className={`tap-feedback flex-1 rounded-lg py-2.5 text-sm font-medium ${
+                    platform === p.key
+                      ? "bg-black text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           <button
             disabled={!name.trim() || busy}
-            onClick={() => onConfirm(name.trim(), avatar)}
+            onClick={() => onConfirm(name.trim(), avatar, platform)}
             className="tap-feedback bg-[#fee500] disabled:opacity-40 text-black font-semibold rounded-lg py-2.5"
           >
             {confirmLabel}

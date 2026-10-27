@@ -3,12 +3,17 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { SPECS, asPlatform, type Platform } from "@/lib/kakaoSpec";
 
 // ---------- Profiles ----------
 
-export async function createProfile(name: string, avatar: string | null) {
+export async function createProfile(
+  name: string,
+  avatar: string | null,
+  platform: Platform,
+) {
   const profile = await prisma.profile.create({
-    data: { name, avatar },
+    data: { name, avatar, platform },
   });
   revalidatePath("/");
   return profile;
@@ -21,10 +26,11 @@ export async function deleteProfile(profileId: string) {
 
 export async function updateProfile(
   profileId: string,
-  data: { name?: string; avatar?: string | null },
+  data: { name?: string; avatar?: string | null; platform?: Platform },
 ) {
   await prisma.profile.update({ where: { id: profileId }, data });
   revalidatePath("/");
+  revalidatePath(`/p/${profileId}`, "layout");
 }
 
 // ---------- Chat rooms ----------
@@ -34,8 +40,18 @@ export async function createChatRoom(
   partnerName: string,
   partnerAvatar: string | null,
 ) {
+  const profile = await prisma.profile.findUniqueOrThrow({
+    where: { id: profileId },
+  });
+  const spec = SPECS[asPlatform(profile.platform)];
   const room = await prisma.chatRoom.create({
-    data: { profileId, partnerName, partnerAvatar },
+    data: {
+      profileId,
+      partnerName,
+      partnerAvatar,
+      avatarColor: spec.defaultAvatar,
+      statusBarTime: spec.defaultClock,
+    },
   });
   revalidatePath(`/p/${profileId}`);
   redirect(`/p/${profileId}/room/${room.id}`);

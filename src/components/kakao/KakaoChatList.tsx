@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { SPEC } from "@/lib/kakaoSpec";
+import type { Platform } from "@/lib/kakaoSpec";
 import KakaoAvatar from "./Avatar";
 import KakaoStatusBar from "./StatusBar";
 import { u } from "./units";
@@ -16,24 +16,106 @@ export type KakaoListRow = {
   unread: number;
 };
 
-// Measured from the chat-list screen of the reference recording (scaled to the 380dp screen).
-const L = {
-  titleCenterY: 78,
-  iconCenterY: 78,
-  chipsTop: 110,
-  chipH: 38.8,
-  chipPadX: 17,
-  chipGap: 7,
-  firstRowTop: 166,
-  rowH: 69.3,
-  avatar: 52.3,
-  avatarLeft: 16.2,
-  textLeft: 80.5,
-  nameTop: 7.7,
-  previewTop: 31.2,
-  timeRight: 14.1,
-  tabCenterY: 744,
-  tabXs: [47.4, 120, 192.6, 264.6, 337.6],
+// Measured from the chat-list screen of the iPhone recording; the Android layout is the same
+// design scaled to the 380dp screen.
+type ListLayout = {
+  W: number;
+  H: number;
+  titleLeft: number;
+  titleCenterY: number;
+  titleSize: number;
+  iconY: number;
+  iconXs: [number, number, number];
+  iconScale: number;
+  chipsTop: number;
+  chipsLeft: number;
+  chipH: number;
+  chipPadX: number;
+  chipGap: number;
+  chipFont: number;
+  firstRowTop: number;
+  rowH: number;
+  avatar: number;
+  avatarLeft: number;
+  textLeft: number;
+  nameTop: number;
+  nameSize: number;
+  previewTop: number;
+  previewSize: number;
+  timeTop: number;
+  timeSize: number;
+  timeRight: number;
+  badgeTop: number;
+  tabBarH: number;
+  tabY: number;
+  tabXs: number[];
+};
+
+const LAYOUTS: Record<Platform, ListLayout> = {
+  android: {
+    W: 380,
+    H: 784,
+    titleLeft: 16.5,
+    titleCenterY: 78,
+    titleSize: 23,
+    iconY: 78,
+    iconXs: [264.6, 307.5, 353.7],
+    iconScale: 1,
+    chipsTop: 110,
+    chipsLeft: 15.6,
+    chipH: 38.8,
+    chipPadX: 17,
+    chipGap: 7,
+    chipFont: 15,
+    firstRowTop: 166,
+    rowH: 69.3,
+    avatar: 52.3,
+    avatarLeft: 16.2,
+    textLeft: 80.5,
+    nameTop: 4.1,
+    nameSize: 16.3,
+    previewTop: 27.5,
+    previewSize: 12.7,
+    timeTop: 5.6,
+    timeSize: 11.7,
+    timeRight: 14.1,
+    badgeTop: 28,
+    tabBarH: 84,
+    tabY: 744,
+    tabXs: [47.4, 120, 192.6, 264.6, 337.6],
+  },
+  ios: {
+    W: 393,
+    H: 852,
+    titleLeft: 16,
+    titleCenterY: 86.9,
+    titleSize: 21.8,
+    iconY: 87,
+    iconXs: [282.2, 324, 365.2],
+    iconScale: 0.96,
+    chipsTop: 117.8,
+    chipsLeft: 15,
+    chipH: 37.3,
+    chipPadX: 16.3,
+    chipGap: 6.7,
+    chipFont: 14.8,
+    firstRowTop: 171.7,
+    rowH: 66.6,
+    avatar: 50.3,
+    avatarLeft: 15.6,
+    textLeft: 77.5,
+    nameTop: 3.9,
+    nameSize: 15.6,
+    previewTop: 26.4,
+    previewSize: 12.1,
+    timeTop: 5.4,
+    timeSize: 11.2,
+    timeRight: 13.6,
+    badgeTop: 27,
+    tabBarH: 83,
+    tabY: 804.5,
+    tabXs: [49, 124.1, 199.2, 273.6, 349.2],
+  },
 };
 
 const INK = "#111111";
@@ -44,13 +126,14 @@ const GEAR_PATH = (() => {
   for (let i = 0; i < 72; i++) {
     const t = (2 * Math.PI * i) / 72;
     const r = 8.5 + 0.95 * Math.cos(6 * t + Math.PI);
-    pts.push(`${(353.7 + r * Math.cos(t)).toFixed(2)} ${(78 + r * Math.sin(t)).toFixed(2)}`);
+    pts.push(`${(r * Math.cos(t)).toFixed(2)} ${(r * Math.sin(t)).toFixed(2)}`);
   }
   return `M${pts.join(" L")} Z`;
 })();
 const TAB_GREY = "#B4B4B8";
 
 export default function KakaoChatList({
+  platform,
   rows,
   statusBarTime,
   battery,
@@ -58,6 +141,7 @@ export default function KakaoChatList({
   onNewChat,
   onSettings,
 }: {
+  platform: Platform;
   rows: KakaoListRow[];
   statusBarTime: string;
   battery: number;
@@ -66,6 +150,9 @@ export default function KakaoChatList({
   onSettings?: () => void;
 }) {
   const id = useId().replace(/:/g, "");
+  const L = LAYOUTS[platform];
+  const [sx, nx, gx] = L.iconXs;
+  const k = L.iconScale;
   return (
     <div
       style={{ containerType: "inline-size", width: "100%", height: "100%" }}
@@ -74,7 +161,7 @@ export default function KakaoChatList({
         className="kakao-screen"
         style={
           {
-            "--u": `calc(100cqw / ${SPEC.W})`,
+            "--u": `calc(100cqw / ${L.W})`,
             position: "relative",
             width: "100%",
             height: "100%",
@@ -87,6 +174,7 @@ export default function KakaoChatList({
         }
       >
         <KakaoStatusBar
+          platform={platform}
           time={statusBarTime}
           battery={battery}
           bg="#FFFFFF"
@@ -96,11 +184,11 @@ export default function KakaoChatList({
         <div
           style={{
             position: "absolute",
-            left: u(16.5),
+            left: u(L.titleLeft),
             top: u(L.titleCenterY - 15),
             height: u(30),
             lineHeight: u(30),
-            fontSize: u(23),
+            fontSize: u(L.titleSize),
             fontWeight: 800,
           }}
         >
@@ -108,7 +196,7 @@ export default function KakaoChatList({
         </div>
 
         <svg
-          viewBox="0 0 380 100"
+          viewBox={`0 0 ${L.W} 110`}
           style={{
             position: "absolute",
             top: 0,
@@ -126,13 +214,19 @@ export default function KakaoChatList({
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <circle cx="263.4" cy="76.6" r="7.4" />
-            <path d="M268.9 82.1 L273.8 87" />
-            <path d="M315.9 79.7 A8.4 8.4 0 1 1 312.9 72.6" />
-            <path d="M301.6 84.9 L299.3 89.2 L304.2 87.3" />
-            <path d="M316.6 72.4 V79 M313.3 75.7 H319.9" />
-            <path d={GEAR_PATH} />
-            <circle cx="353.7" cy="78" r="3.1" />
+            <g transform={`translate(${sx} ${L.iconY}) scale(${k})`}>
+              <circle cx="-1.2" cy="-1.4" r="7.4" />
+              <path d="M4.3 4.1 L9.2 9" />
+            </g>
+            <g transform={`translate(${nx} ${L.iconY}) scale(${k})`}>
+              <path d="M8.4 0.7 A8.4 8.4 0 1 1 5.4 -6.4" />
+              <path d="M-5.9 5.9 L-8.2 10.2 L-3.3 8.3" />
+              <path d="M9.1 -6.6 V0 M5.8 -3.3 H12.4" />
+            </g>
+            <g transform={`translate(${gx} ${L.iconY}) scale(${k})`}>
+              <path d={GEAR_PATH} />
+              <circle cx="0" cy="0" r="3.1" />
+            </g>
           </g>
         </svg>
         {onNewChat && (
@@ -142,8 +236,8 @@ export default function KakaoChatList({
             className="kakao-press"
             style={{
               position: "absolute",
-              left: u(290),
-              top: u(58),
+              left: u(nx - 19),
+              top: u(L.iconY - 19),
               width: u(38),
               height: u(38),
               borderRadius: u(19),
@@ -157,8 +251,8 @@ export default function KakaoChatList({
             className="kakao-press"
             style={{
               position: "absolute",
-              left: u(333),
-              top: u(58),
+              left: u(gx - 19),
+              top: u(L.iconY - 19),
               width: u(38),
               height: u(38),
               borderRadius: u(19),
@@ -175,7 +269,7 @@ export default function KakaoChatList({
             right: 0,
             display: "flex",
             gap: u(L.chipGap),
-            paddingLeft: u(15.6),
+            paddingLeft: u(L.chipsLeft),
             overflow: "hidden",
             whiteSpace: "nowrap",
           }}
@@ -190,7 +284,7 @@ export default function KakaoChatList({
                 borderRadius: u(L.chipH / 2),
                 background: i === 0 ? "#171717" : "#EFEFEF",
                 color: i === 0 ? "#FFFFFF" : "#222222",
-                fontSize: u(15),
+                fontSize: u(L.chipFont),
                 fontWeight: i === 0 ? 700 : 500,
                 flexShrink: 0,
               }}
@@ -231,7 +325,7 @@ export default function KakaoChatList({
             top: u(L.firstRowTop),
             left: 0,
             right: 0,
-            bottom: u(84),
+            bottom: u(L.tabBarH),
             overflowY: "auto",
           }}
         >
@@ -256,8 +350,8 @@ export default function KakaoChatList({
                   position: "absolute",
                   left: u(L.textLeft),
                   right: u(90),
-                  top: u(L.nameTop - 3.6),
-                  fontSize: u(16.3),
+                  top: u(L.nameTop),
+                  fontSize: u(L.nameSize),
                   lineHeight: u(22),
                   fontWeight: 600,
                   whiteSpace: "nowrap",
@@ -272,8 +366,8 @@ export default function KakaoChatList({
                   position: "absolute",
                   left: u(L.textLeft),
                   right: u(52),
-                  top: u(L.previewTop - 3.7),
-                  fontSize: u(12.7),
+                  top: u(L.previewTop),
+                  fontSize: u(L.previewSize),
                   lineHeight: u(18),
                   color: "#8E8E93",
                   whiteSpace: "nowrap",
@@ -287,8 +381,8 @@ export default function KakaoChatList({
                 style={{
                   position: "absolute",
                   right: u(L.timeRight),
-                  top: u(5.6),
-                  fontSize: u(11.7),
+                  top: u(L.timeTop),
+                  fontSize: u(L.timeSize),
                   lineHeight: u(18),
                   color: "#A3A3A8",
                   whiteSpace: "nowrap",
@@ -301,7 +395,7 @@ export default function KakaoChatList({
                   style={{
                     position: "absolute",
                     right: u(L.timeRight),
-                    top: u(28),
+                    top: u(L.badgeTop),
                     minWidth: u(19),
                     height: u(19),
                     padding: `0 ${u(5.5)}`,
@@ -323,7 +417,7 @@ export default function KakaoChatList({
         </div>
 
         <svg
-          viewBox="0 0 380 84"
+          viewBox={`0 0 ${L.W} ${L.tabBarH}`}
           style={{
             position: "absolute",
             bottom: 0,
@@ -334,7 +428,7 @@ export default function KakaoChatList({
           }}
           aria-hidden
         >
-          <g transform="translate(0 -700)">
+          <g transform={`translate(0 ${-(L.H - L.tabBarH) + (L.tabY - 744)})`}>
             <g fill={TAB_GREY}>
               <circle cx={L.tabXs[0]} cy="737.3" r="5.6" />
               <path

@@ -15,6 +15,7 @@ model Profile {
   id        String     @id @default(cuid())
   name      String
   avatar    String? // base64 data URL
+  platform  String     @default("android") // "android" | "ios": which KakaoTalk look to imitate
   createdAt DateTime   @default(now())
   chatRooms ChatRoom[]
 }
