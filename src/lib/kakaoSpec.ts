@@ -1,6 +1,6 @@
 // Layout tokens measured from real KakaoTalk captures.
 // android: a 760x1568px screenshot, in dp on a 380x784 screen.
-// ios: Kakao's App Store capture of iOS 26 (393x852pt at 2.346px/pt), in pt.
+// ios: in pt on a 393x852 iPhone (see IOS below for the captures used).
 // Everything is rendered relative to the screen width, so proportions hold on any device.
 
 export type Platform = "android" | "ios";
@@ -40,6 +40,8 @@ export type Spec = {
     padH: number;
     /** right padding when it differs from padH (offsets the trailing letter-spacing) */
     padR?: number;
+    /** [left, right] padding per side when the two senders' bubbles differ */
+    pad?: { me: [number, number]; partner: [number, number] };
     radius: number;
     maxWidth: number;
     minWidth: number;
@@ -55,9 +57,22 @@ export type Spec = {
       joinY: number;
     };
   };
-  time: { size: number; color: string; gap: number; bottom: number };
+  time: {
+    size: number;
+    color: string;
+    gap: number;
+    bottom: number;
+    /** the partner's time when it sits at a different height than mine */
+    bottomPartner?: number;
+  };
   unread: { size: number; color: string };
-  gap: { consecutive: number; group: number; date: number };
+  /** partnerExtra: added before a partner's group, whose avatar sits a little lower */
+  gap: {
+    consecutive: number;
+    group: number;
+    partnerExtra?: number;
+    date: number;
+  };
   datePill: {
     h: number;
     padL: number;
@@ -146,59 +161,67 @@ const ANDROID: Spec = {
   },
 };
 
-// iPhone (iOS 26) values are measured from Kakao's own App Store capture (2.346px per pt).
+// iPhone values: chrome (status bar, glass header, input capsule) is measured from Kakao's
+// App Store capture of iOS 26; the conversation itself (type sizes, bubbles, spacing) from a
+// real iPhone screenshot at the default text size (1.504px per pt).
 const IOS: Spec = {
   W: 393,
   H: 852,
   exportWidthPx: 1179,
-  chatBg: "#ABC1D1",
+  chatBg: "#ABC0D3",
   textColor: "#191919",
-  letterSpacing: "0.035em",
+  letterSpacing: "0.02em",
   fontWeight: 450,
-  defaultAvatar: "teal",
+  defaultAvatar: "sky",
   defaultClock: "9:41",
-  chatTop: 110,
+  chatTop: 108.3,
   chatBottomGap: 14,
   inputH: 99.25,
-  avatar: { size: 34.3, left: 9.4 },
-  name: { size: 11, color: "#1B1E20", top: 1.2, dx: -0.8 },
-  bubbleTopFromAvatar: 18.1,
+  avatar: { size: 34.6, left: 10 },
+  name: { size: 11.7, color: "#273947", top: 5, dx: 0 },
+  bubbleTopFromAvatar: 22,
   bubble: {
-    left: 51.3,
-    rightMargin: 9.16,
-    fontSize: 14.35,
-    lineHeight: 18.1,
-    padTop: 8.6,
-    padBottom: 8.2,
-    padH: 11.25,
-    padR: 10.4,
-    radius: 12.75,
-    maxWidth: 228,
-    minWidth: 35,
+    left: 52,
+    rightMargin: 9.7,
+    fontSize: 11.75,
+    lineHeight: 14.5,
+    padTop: 9.4,
+    padBottom: 9.4,
+    padH: 11.9,
+    pad: { me: [11.4, 12.4], partner: [9.9, 13.4] },
+    radius: 12.5,
+    maxWidth: 250,
+    minWidth: 32,
     tail: {
-      tipX: 3.4,
-      tipY: 0.9,
-      back: 8.4,
-      lowCtrlX: -0.85,
-      lowCtrlY: 3.6,
-      upCtrlX: 0.8,
-      upCtrlY: 1.2,
-      joinY: 3.6,
+      tipX: 2.4,
+      tipY: 0.8,
+      back: 7.6,
+      lowCtrlX: -0.75,
+      lowCtrlY: 3.2,
+      upCtrlX: 0.7,
+      upCtrlY: 1.1,
+      joinY: 3.2,
     },
   },
-  time: { size: 9.5, color: "#535C63", gap: 4.6, bottom: -0.2 },
-  unread: { size: 9.8, color: "#F2C200" },
-  gap: { consecutive: 5.5, group: 16.4, date: 20 },
+  time: {
+    size: 10.35,
+    color: "#435664",
+    gap: 6.6,
+    bottom: -1.2,
+    bottomPartner: -2,
+  },
+  unread: { size: 10.6, color: "#F2C200" },
+  gap: { consecutive: 5, group: 13.2, partnerExtra: 2.1, date: 12 },
   datePill: {
-    h: 26.5,
-    padL: 9.5,
-    padR: 12,
-    fontSize: 12.3,
-    color: "rgba(255,255,255,0.9)",
-    bg: "rgba(0,0,0,0.075)",
-    chevronW: 4.1,
-    chevronH: 7.4,
-    chevronGap: 6.8,
+    h: 26,
+    padL: 9,
+    padR: 12.9,
+    fontSize: 12,
+    color: "#FFFFFF",
+    bg: "rgba(0,0,0,0.07)",
+    chevronW: 4.9,
+    chevronH: 7.5,
+    chevronGap: 5.6,
     icon: true,
   },
   image: {
@@ -217,6 +240,7 @@ export const SPECS: Record<Platform, Spec> = { android: ANDROID, ios: IOS };
 export const AVATAR_COLORS = [
   { key: "mint", base: "#88DCD6", light: "#9EE5DF", figure: "#E1F7F5" },
   { key: "teal", base: "#4AA7BA", light: "#53AEC1", figure: "#93D6E8" },
+  { key: "sky", base: "#7FCDE1", light: "#84D2E5", figure: "#B6E7F4" },
   { key: "blue", base: "#7FA8E8", light: "#8CB3EE", figure: "#D5E3FA" },
   { key: "purple", base: "#A99BE6", light: "#B5A9EC", figure: "#E3DEFA" },
   { key: "pink", base: "#F0A3B8", light: "#F4B1C3", figure: "#FBE2E9" },

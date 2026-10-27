@@ -43,7 +43,10 @@ function layoutItems(messages: KakaoMessage[], spec: Spec): Item[] {
       if (m.type === "DATE_DIVIDER" || prev.type === "DATE_DIVIDER")
         marginTop = spec.gap.date;
       else if (sameGroup(prev, m)) marginTop = spec.gap.consecutive;
-      else marginTop = spec.gap.group;
+      else
+        marginTop =
+          spec.gap.group +
+          (m.sender === "PARTNER" ? (spec.gap.partnerExtra ?? 0) : 0);
     }
     const first = !sameGroup(prev, m);
     return {
@@ -175,6 +178,69 @@ function DatePill({ spec, label }: { spec: Spec; label: string }) {
   );
 }
 
+// A wrapped paragraph keeps its box at max-width in CSS; Kakao shrinks the bubble to the
+// longest line, so measure the laid-out lines and narrow the box to them.
+function useShrinkToLines(
+  ref: React.RefObject<HTMLDivElement | null>,
+  fitKey: string,
+) {
+  useLayoutEffect(() => {
+    const box = ref.current;
+    const text = box?.querySelector("[data-text]");
+    if (!box || !text) return;
+    const fit = () => {
+      box.style.width = "";
+      if (!box.offsetWidth) return;
+      // union of the words' boxes: a space where a line wraps hangs past the line and must not count
+      let left = Infinity;
+      let right = -Infinity;
+      const range = document.createRange();
+      const walker = document.createTreeWalker(text, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        for (const word of (n.textContent ?? "").matchAll(/\S+/g)) {
+          range.setStart(n, word.index);
+          range.setEnd(n, word.index + word[0].length);
+          for (const r of range.getClientRects()) {
+            left = Math.min(left, r.left);
+            right = Math.max(right, r.right);
+          }
+        }
+      }
+      if (right < left) return;
+      const scale = box.getBoundingClientRect().width / box.offsetWidth;
+      const lines = (right - left) / scale;
+      const cs = getComputedStyle(box);
+      const w =
+        lines + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 0.5;
+      if (w < box.offsetWidth - 0.5) box.style.width = `${w}px`;
+    };
+    fit();
+    const screen = box.closest(".kakao-screen");
+    const ro = new ResizeObserver(fit);
+    if (screen) ro.observe(screen);
+    document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [ref, fitKey]);
+}
+
+function PlainBubble({
+  style,
+  fitKey,
+  children,
+}: {
+  style: React.CSSProperties;
+  fitKey: string;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useShrinkToLines(ref, fitKey);
+  return (
+    <div ref={ref} style={style}>
+      {children}
+    </div>
+  );
+}
+
 function bubblePath(w: number, h: number, spec: Spec, side: "left" | "right") {
   const R = spec.bubble.radius;
   const t = spec.bubble.tail;
@@ -200,15 +266,18 @@ function TailedBubble({
   color,
   side,
   style,
+  fitKey,
   children,
 }: {
   spec: Spec;
   color: string;
   side: "left" | "right";
   style: React.CSSProperties;
+  fitKey: string;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  useShrinkToLines(ref, fitKey);
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
   useLayoutEffect(() => {
     const el = ref.current;
@@ -274,7 +343,11 @@ function Meta({
         alignItems: align === "left" ? "flex-start" : "flex-end",
         alignSelf: "flex-end",
         flexShrink: 0,
-        marginBottom: u(spec.time.bottom),
+        marginBottom: u(
+          align === "left"
+            ? (spec.time.bottomPartner ?? spec.time.bottom)
+            : spec.time.bottom,
+        ),
         [align === "left" ? "marginLeft" : "marginRight"]: u(spec.time.gap),
       }}
     >
@@ -411,9 +484,13 @@ function MessageRow({
   const color = isMe ? "#FEE500" : "#FFFFFF";
   const isImage = m.type === "IMAGE";
 
+  const [padL, padR] = (isMe ? b.pad?.me : b.pad?.partner) ?? [
+    b.padH,
+    b.padR ?? b.padH,
+  ];
   const textStyle: React.CSSProperties = {
     position: "relative",
-    padding: `${u(b.padTop)} ${u(b.padR ?? b.padH)} ${u(b.padBottom)} ${u(b.padH)}`,
+    padding: `${u(b.padTop)} ${u(padR)} ${u(b.padBottom)} ${u(padL)}`,
     maxWidth: u(b.maxWidth),
     minWidth: u(b.minWidth),
     boxSizing: "border-box",
@@ -425,7 +502,12 @@ function MessageRow({
     overflowWrap: "anywhere",
     textAlign: "left",
   };
-  const text = <span style={{ position: "relative" }}>{m.content}</span>;
+  const text = (
+    <span data-text style={{ position: "relative" }}>
+      {m.content}
+    </span>
+  );
+  const fitKey = `${m.content}|${fontScale}`;
   const body = isImage ? (
     <ImageBody spec={spec} src={m.content} />
   ) : tail ? (
@@ -434,13 +516,17 @@ function MessageRow({
       color={color}
       side={isMe ? "right" : "left"}
       style={textStyle}
+      fitKey={fitKey}
     >
       {text}
     </TailedBubble>
   ) : (
-    <div style={{ ...textStyle, background: color, borderRadius: u(b.radius) }}>
+    <PlainBubble
+      style={{ ...textStyle, background: color, borderRadius: u(b.radius) }}
+      fitKey={fitKey}
+    >
       {text}
-    </div>
+    </PlainBubble>
   );
 
   const meta = (

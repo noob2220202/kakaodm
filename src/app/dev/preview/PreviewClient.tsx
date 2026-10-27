@@ -37,6 +37,37 @@ type Fixture = {
 };
 
 const FIXTURES: Record<string, Fixture> = {
+  // a real iPhone screenshot at the default text size
+  yumi: {
+    platform: "ios",
+    name: "유미",
+    color: "sky",
+    time: "9:15",
+    battery: 58,
+    messages: [
+      d("2026년 10월 22일 목요일"),
+      m(
+        "ME",
+        "아침일찍이라서 그런가\n전화를 안받노 ㅜ\n유미야 태영이 언니 인데 저번에 부탁한거 오늘 좀 가능할까 ?",
+        "오전 8:17",
+      ),
+      m(
+        "PARTNER",
+        "아 언니 운전한다구요 미안요ㅎ 500만원이 될려나 모르겠넹 😭\n되면 바로 보낼께요 일단 계좌 주세요 언니",
+        "오전 9:02",
+      ),
+      m(
+        "ME",
+        "ㅇㅇ부탁좀요 급해서리\n보내고 톡 주고\n우리 심태영 1005 803 524921",
+        "오전 9:11",
+      ),
+      m(
+        "PARTNER",
+        "언니 보냈어용ㅎ\n가게이름 현정이로 보냈어요ㅎ",
+        "오전 9:31",
+      ),
+    ],
+  },
   android: {
     platform: "android",
     name: "f. 아바",
